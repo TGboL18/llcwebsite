@@ -6,7 +6,10 @@ addEventListener("fetch", event => {
 const SITE_TITLE = "LLC Creative Technologies"
 const LOGO_URL = "https://image2url.com/r2/default/gifs/1771931447321-b9c0bd19-ff5c-4d39-8d0a-06b9ab79821e.gif"
 const AUDIO_URL = "https://image2url.com/r2/default/audio/1771931706652-c6c30957-9354-46ef-869b-339a6e020cf6.mp3"
+// invite for The Hub (hidden, used as href)
 const THE_HUB_INVITE = "https://t.me/+7AcFN8RMcnc5N2U1"
+// anonychat target (hidden)
+const ANONYCHAT_INVITE = "https://t.me/anonychatllc_bot/anonychatllc"
 const KV_KEY = "views"
 /* end config */
 
@@ -147,7 +150,25 @@ async function handleRequest(request) {
   }
   @keyframes glowShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-  /* funtify centered */
+  /* anonychat jumping animation */
+  .anony {
+    font-weight:800;
+    font-size:18px;
+    cursor:pointer;
+    display:inline-block;
+    padding:8px 12px;
+    border-radius:8px;
+    color:var(--fg);
+    animation:jump 1.2s ease-in-out infinite;
+  }
+  @keyframes jump {
+    0% { transform: translateY(0); }
+    25% { transform: translateY(-8px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+  }
+
   .other-site{
     font-weight:800;
     font-size:18px;
@@ -179,6 +200,12 @@ async function handleRequest(request) {
   .modal.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
   .modal.hide { opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(0.96); }
 
+  /* fade overlay used before redirect */
+  .fade-overlay {
+    position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity 900ms ease; z-index:3000;
+  }
+  .fade-overlay.visible { opacity:1; pointer-events:auto; }
+
   /* rainer */
   .rainer{pointer-events:none;position:fixed;inset:0;overflow:hidden;z-index:999;}
   .th{position:absolute;top:-10%;left:0;font-weight:800;color:rgba(255,255,255,0.95);text-shadow:0 2px 8px rgba(0,0,0,0.6);animation:fall linear forwards;user-select:none;-webkit-user-select:none;}
@@ -188,9 +215,11 @@ async function handleRequest(request) {
   .pill{ background: rgba(255,255,255,0.02); padding:8px 12px; border-radius:999px; }
   .footer{ position:fixed; bottom:10px; font-size:12px; opacity:0.6; width:100%; text-align:center; left:0; }
 
-  /* Sidebar (unchanged) */
-  .sidebar { position:fixed; right:0; top:50%; transform:translateY(-50%); background: rgba(255,255,255,0.02); padding:10px 14px; border-radius:8px 0 0 8px; display:flex; align-items:center; justify-content:center; z-index:800; max-width:160px; min-width:120px; box-sizing:border-box; }
-  .sidebar .label { color: var(--gray); font-weight:700; font-size:13px; line-height:1.2; text-align:center; white-space:nowrap; }
+  /* landscape overlay */
+  .landscape-overlay {
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); color:#fff; font-size:30px; font-weight:900; text-align:center; z-index:4000; opacity:0; pointer-events:none; transition: opacity 200ms ease;
+  }
+  .landscape-overlay.show { opacity:1; pointer-events:auto; }
 
   @media(min-width:520px){ img.logo{ width:320px } }
 </style>
@@ -216,7 +245,7 @@ async function handleRequest(request) {
       <div class="section">
         <h3>our gc's</h3>
         <div class="list">
-          <a id="theHub" class="thehub gc-glow" href="${escapeHtml(THE_HUB_INVITE)}" target="_blank" rel="noopener noreferrer">The Hub</a>
+          <a id="theHub" class="link thehub gc-glow" href="${escapeHtml(THE_HUB_INVITE)}" target="_blank" rel="noopener noreferrer">The Hub</a>
         </div>
       </div>
 
@@ -225,6 +254,8 @@ async function handleRequest(request) {
         <h3>our Other website</h3>
         <div class="list">
           <span id="funtify" class="other-site" tabindex="0">funtify</span>
+          <!-- anonychat hidden link displayed as "anonychat" -->
+          <span id="anonychat" class="anony" tabindex="0">anonychat</span>
         </div>
       </div>
 
@@ -233,11 +264,10 @@ async function handleRequest(request) {
     <div id="rainer" class="rainer" aria-hidden="true"></div>
 
     <div id="modal" class="modal hide" role="dialog" aria-modal="true" aria-hidden="true">Currently not available</div>
+    <div id="fadeOverlay" class="fade-overlay" aria-hidden="true"></div>
+    <div id="landOverlay" class="landscape-overlay" aria-hidden="true">no fucking landscape!</div>
 
   </main>
-
-  <!-- Sidebar: Funtify label -->
-  <aside class="sidebar" aria-hidden="false"><div class="label">Funtify</div></aside>
 
   <div class="info-row" aria-hidden="false">
     <div class="pill" id="timeBox">${new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila", hour12:true, year:'numeric', month:'long', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })}</div>
@@ -246,20 +276,21 @@ async function handleRequest(request) {
 
   <div class="footer">Powered by L © 2026 LLC Tech Corporation</div>
 
+  <!-- background audio -->
   <audio id="bgAudio" autoplay loop playsinline preload="auto" crossorigin="anonymous">
     <source src="${escapeHtml(AUDIO_URL)}" type="audio/mpeg">
   </audio>
 
 <script>
-  // Manila time
-  function updateTime() {
+  // helper
+  function updateTimeDisplay() {
     const opts = { timeZone: 'Asia/Manila', hour12: true, year:'numeric', month:'long', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' };
     document.getElementById('timeBox').textContent = new Date().toLocaleString('en-PH', opts);
   }
-  setInterval(updateTime,1000);
-  updateTime();
+  setInterval(updateTimeDisplay,1000);
+  updateTimeDisplay();
 
-  // audio autoplay best-effort
+  // autoplay best-effort
   const audio = document.getElementById('bgAudio');
   async function tryPlay() {
     try { audio.muted = false; await audio.play(); return true; }
@@ -268,8 +299,8 @@ async function handleRequest(request) {
   window.addEventListener('load', async () => {
     const ok = await tryPlay();
     if (!ok) {
-      function startOnGesture() { audio.play().catch(()=>{}); removeGestureListeners(); }
-      function removeGestureListeners() {
+      function startOnGesture() { audio.play().catch(()=>{}); removeListeners(); }
+      function removeListeners() {
         document.removeEventListener('pointerdown', startOnGesture);
         document.removeEventListener('touchstart', startOnGesture);
         document.removeEventListener('click', startOnGesture);
@@ -316,7 +347,6 @@ async function handleRequest(request) {
   // funtify popup: fade in/out
   const funtify = document.getElementById('funtify');
   const modal = document.getElementById('modal');
-
   function showModal(msg, duration=1800) {
     modal.textContent = msg;
     modal.classList.remove('hide'); modal.classList.add('show');
@@ -326,17 +356,95 @@ async function handleRequest(request) {
       modal.setAttribute('aria-hidden','true');
     }, duration);
   }
+  funtify.addEventListener('click', (e) => { e.preventDefault(); showModal('Currently not available', 1800); }, { passive:false });
+  funtify.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); showModal('Currently not available', 1800); } });
 
-  funtify.addEventListener('click', (e) => {
+  // ANONYCHAT behaviour:
+  // - visible text "anonychat" jumps
+  // - on click: play short sound (WebAudio), start 5s timer, fade to black, then redirect to invite
+  const anony = document.getElementById('anonychat');
+  const fadeOverlay = document.getElementById('fadeOverlay');
+
+  function playClickTone() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(880, ctx.currentTime);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      // ramp up quickly
+      g.gain.exponentialRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+      o.connect(g); g.connect(ctx.destination);
+      o.start();
+      // second tone
+      setTimeout(()=> {
+        o.frequency.setValueAtTime(660, ctx.currentTime);
+      }, 120);
+      // stop after 400ms
+      setTimeout(()=> {
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+        setTimeout(()=> { try { o.stop(); ctx.close(); } catch(e){} }, 80);
+      }, 400);
+    } catch (e) {
+      // WebAudio may be blocked; ignore
+      console.warn('Audio click failed', e);
+    }
+  }
+
+  function startAnonySequence() {
+    // play sound
+    playClickTone();
+
+    // visually indicate immediate press (scale)
+    anony.style.transform = 'scale(1.08)';
+    anony.style.transition = 'transform 180ms ease';
+
+    // after 5s: fade overlay, then redirect
+    const delay = 5000;
+    setTimeout(() => {
+      fadeOverlay.classList.add('visible');
+      fadeOverlay.setAttribute('aria-hidden','false');
+      // after fade completes (match CSS 900ms), redirect
+      setTimeout(() => {
+        // navigate current window to invite (this closes/overwrites page)
+        window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)};
+      }, 950);
+    }, delay);
+  }
+
+  anony.addEventListener('click', (e) => {
     e.preventDefault();
-    showModal('Currently not available', 1800);
+    // ensure a user gesture (click) has happened — WebAudio allowed
+    startAnonySequence();
   }, { passive:false });
 
-  funtify.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' || ev.key === ' ') {
-      ev.preventDefault();
-      showModal('Currently not available', 1800);
+  anony.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); startAnonySequence(); }
+  });
+
+  // landscape detection: show big overlay with message
+  const landOverlay = document.getElementById('landOverlay');
+
+  function checkLandscape() {
+    const isLandscape = (window.innerWidth > window.innerHeight);
+    if (isLandscape) {
+      landOverlay.classList.add('show');
+      landOverlay.setAttribute('aria-hidden','false');
+    } else {
+      landOverlay.classList.remove('show');
+      landOverlay.setAttribute('aria-hidden','true');
     }
+  }
+  // check on load and on resize/orientation change
+  window.addEventListener('load', checkLandscape);
+  window.addEventListener('resize', checkLandscape);
+  window.addEventListener('orientationchange', () => { setTimeout(checkLandscape, 120); });
+
+  // accessibility: allow closing landscape overlay with tap
+  landOverlay.addEventListener('click', () => {
+    landOverlay.classList.remove('show');
+    landOverlay.setAttribute('aria-hidden','true');
   });
 
   // logo toggles audio
@@ -346,7 +454,7 @@ async function handleRequest(request) {
     else audio.pause();
   }, { passive:true });
 
-  // close modal on Escape
+  // accessibility: close modal on Escape
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Escape') { modal.classList.remove('show'); modal.classList.add('hide'); modal.setAttribute('aria-hidden','true'); }
   });
@@ -371,4 +479,4 @@ function escapeHtml (str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
-    }
+}
