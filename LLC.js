@@ -43,7 +43,7 @@ async function handleRequest(request) {
   <title>${escapeHtml(SITE_TITLE)}</title>
   <meta name="theme-color" content="#000000" />
   <style>
-    :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); }
+    :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); --gray:#9aa0a6; }
     html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
     .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;text-align:center;position:relative;overflow:hidden;}
     img.logo{width:280px;max-width:78%;height:auto;display:block;border:0;margin:0;}
@@ -151,6 +151,33 @@ async function handleRequest(request) {
     .info-row{ position:fixed; left:0; right:0; bottom:38px; display:flex; justify-content:space-between; align-items:center; padding:0 18px; box-sizing:border-box; font-size:13px; color:var(--muted); max-width:1100px; margin:0 auto; }
     .pill{ background: rgba(255,255,255,0.02); padding:8px 12px; border-radius:999px; }
     .footer{ position:fixed; bottom:10px; font-size:12px; opacity:0.6; width:100%; text-align:center; left:0; }
+
+    /* Sidebar */
+    .sidebar {
+      position:fixed;
+      right:0;
+      top:50%;
+      transform:translateY(-50%);
+      background: rgba(255,255,255,0.02);
+      padding:10px 14px;
+      border-radius:8px 0 0 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:800;
+      max-width:160px;
+      min-width:120px;
+      box-sizing:border-box;
+    }
+    .sidebar .label {
+      color: var(--gray);
+      font-weight:700;
+      font-size:13px;
+      line-height:1.2;
+      text-align:center;
+      white-space:nowrap;
+    }
+
     @media(min-width:520px){ img.logo{ width:320px } }
   </style>
 </head>
@@ -158,7 +185,8 @@ async function handleRequest(request) {
   <main class="wrap" role="main" aria-label="${escapeHtml(SITE_TITLE)}">
     <img id="logo" class="logo" src="${escapeHtml(LOGO_URL)}" alt="${escapeHtml(SITE_TITLE)} logo">
     <div class="title">${escapeHtml(SITE_TITLE)}</div>
-    <div class="meta">Portrait-friendly • Manila time • Looping background audio</div>
+    <!-- REPLACED SUBTITLE -->
+    <div class="meta">We create Tech</div>
 
     <div class="links" aria-hidden="false">
       <a class="bot-link bot1" href="https://t.me/globanllcbot_bot" target="_blank" rel="noopener noreferrer">@globanllcbot_bot</a>
@@ -176,6 +204,11 @@ async function handleRequest(request) {
     <div id="rainer" class="rainer" aria-hidden="true"></div>
 
   </main>
+
+  <!-- Sidebar: Funtify currently unavailable (gray text) -->
+  <aside class="sidebar" aria-hidden="false">
+    <div class="label">Funtify currently unavailable</div>
+  </aside>
 
   <div class="info-row" aria-hidden="false">
     <div class="pill" id="timeBox">${new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila", hour12:true, year:'numeric', month:'long', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })}</div>
@@ -267,7 +300,6 @@ async function handleRequest(request) {
     function hubClicked(e) {
       // enlarge
       theHub.classList.add('gc-active');
-      // temporarily remove glow if you want; keep as per design (we keep glow)
       // spawn multiple TH elements quickly
       const bursts = 120; // number of TH pieces total
       const burstInterval = 25; // ms between spawns
@@ -283,9 +315,7 @@ async function handleRequest(request) {
           }, 1700);
         }
       }, burstInterval);
-      // enlarge the clicked element visually (optional: also center)
-      // allow normal navigation to the invite link to proceed (we opened target _blank)
-      // stop pointer events to prevent multiple rapid triggers
+      // disable repeated immediate triggers
       theHub.style.pointerEvents = 'none';
       setTimeout(()=>{ theHub.style.pointerEvents = ''; }, 2500);
     }
@@ -326,4 +356,4 @@ function escapeHtml (str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;')
-}
+    }
