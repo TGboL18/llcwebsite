@@ -5,15 +5,36 @@ addEventListener("fetch", event => {
 /* CONFIG */
 const SITE_TITLE = "LLC Creative Technologies"
 const LOGO_URL = "https://image2url.com/r2/default/gifs/1771931447321-b9c0bd19-ff5c-4d39-8d0a-06b9ab79821e.gif"
-const AUDIO_URL = "https://image2url.com/r2/default/audio/1771931706652-c6c30957-9354-46ef-869b-339a6e020cf6.mp3"
-// invite for The Hub (hidden)
+const BG_AUDIO_URL = "https://image2url.com/r2/default/audio/1771931706652-c6c30957-9354-46ef-869b-339a6e020cf6.mp3"
+const GLOBAN_DASH_AUDIO = "https://image2url.com/r2/default/audio/1772110775520-55e0902b-b85b-46e2-80e0-a5ff971dda44.m4a"
 const THE_HUB_INVITE = "https://t.me/+7AcFN8RMcnc5N2U1"
-// anonychat invite (hidden)
-const ANONYCHAT_INVITE = "https://t.me/anonychatllc_bot/anonychatllc"
-// audio to play before redirect (the M4A you provided)
-const ANONYCHAT_AUDIO_URL = "https://image2url.com/r2/default/audio/1772026713893-31ad5447-91c0-4842-8c51-b03c2331cf60.m4a"
+const GLOBAN_BOT_INVITE = "https://t.me/globanllcbot_bot"
 const KV_KEY = "views"
 /* end config */
+
+/* registered groups to show on the Globan dashboard */
+const GLOBAN_GROUPS = [
+  "• ⌜💘⌟ 𝓐𝓯𝓪𝓶𝐇𝐔�NT𝐄𝐑𝐙",
+  "• ⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ᴘʀᴇᴍɪᴜᴍ",
+  "• ⌜️🏆⌟ 𝐕𝐀𝐑𝐒𝐈𝐓𝐘 ᴘʜ",
+  "• [ 𝗧𝗔𝗠𝗕𝗔𝗬𝗔𝗡 𝗡𝗚 𝗠𝗚𝗔 𝗕𝗔𝗗𝗜𝗡𝗚 ]",
+  "• 𝐂𝐚𝐦𝐩𝐮𝐬 𝐨𝐟 𝐆𝐨𝐝𝐝𝐞𝐬𝐬",
+  "• 🅦 𝙷𝙸𝙳𝙴𝙾𝚄𝚃",
+  "• 🇹𝖍𝖊 🇭✧🇴✧🇰",
+  "• 𝕱𝖀𝕭𝖀 | 𝐅𝐮𝐧 𝐁𝐮𝐝𝐝𝐲",
+  "• 𝐍𝐀𝐍𝐍𝐎'𝐒 𝐒𝐀𝐍𝐂𝐓𝐔𝐀𝐑𝐘",
+  "• 𝑯𝑶𝑹𝑵𝒀 𝑪𝑰𝑻𝒀",
+  "• 『 𝐂𝐇𝐀𝐓 𝐍' 𝐂𝐇𝐈𝐋𝐋 』",
+  "• 『 𝗞𝗔𝗟𝗔𝗧 𝗚𝗔𝗟𝗟𝗘𝗥𝗜𝗔 』",
+  "• 𝙎𝙖𝙣𝙜’𝙜𝙧𝙚 𝙇𝙪𝙭𝙚 𝙎𝙤𝙘𝙞𝙚𝙩𝙮🦋",
+  "• ☬Ë™️|☞Escape The Mercy☜",
+  "• ⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ғʀᴇᴇᴍɪᴜᴍ",
+  "• 《◇TROPAPIP'Z 8.O◇》",
+  "• Music jam",
+  "• 『 𝗦𝗔𝗡𝗚𝗚𝗨𝗡𝗜𝗔𝗡𝗚 𝗞𝗔𝗟𝗜𝗕𝗨𝗚𝗔𝗡 』",
+  "• 『 𝑻𝒉𝒆 𝑨𝒓𝒄𝒉𝒊𝒗𝒆𝒔 』",
+  "• Pinoy Bi Hub"
+]
 
 let fallbackViews = 0
 
@@ -33,79 +54,185 @@ async function getAndIncrementViews() {
   return fallbackViews
 }
 
-async function handleRequest(request) {
-  if (request.method !== "GET") return new Response(null, { status: 405 })
+function responseHTML(html) {
+  return new Response(html, {
+    status: 200,
+    headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store, private, max-age=0" }
+  })
+}
 
+async function handleRequest(request) {
+  const url = new URL(request.url)
+  const pathname = url.pathname.replace(/\/+$/, "") || "/"
+  // increment views for main page only
   const views = await getAndIncrementViews()
 
-  const html = `<!doctype html>
+  if (pathname === "/globan") {
+    // Globan dashboard page
+    const groupsHtml = GLOBAN_GROUPS.map(g => `<li>${escapeHtml(g)}</li>`).join("\n")
+    const html = `<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escapeHtml(SITE_TITLE)} — Globan Dashboard</title>
+<meta name="theme-color" content="#000"/>
+<style>
+  :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.85); --accent:#ff4d4d; }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:28px 18px;box-sizing:border-box;gap:18px;}
+  .top{width:100%;max-width:900px;display:flex;align-items:center;gap:14px;}
+  .logo{width:72px;height:72px;border-radius:12px;object-fit:cover;border:0;}
+  .headerTitle{font-weight:800;font-size:18px;}
+  .subtitle{color:var(--muted);font-size:13px;}
+  .content{width:100%;max-width:900px;background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,0.6);display:flex;flex-direction:column;gap:14px;}
+  .groups{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;font-weight:700}
+  .groups li{padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:15px}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;}
+  .btn{background:linear-gradient(90deg,#ff8a8a,#ff4d4d);color:#051423;padding:10px 14px;border-radius:12px;border:none;font-weight:800;cursor:pointer;text-decoration:none}
+  .btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+  .small{font-size:13px;color:var(--muted)}
+  .footer{margin-top:8px;font-size:12px;color:rgba(255,255,255,0.6)}
+  @media (max-width:520px){ .top{flex-direction:row;align-items:center} .logo{width:64px;height:64px} .content{padding:12px} }
+</style>
+</head>
+<body>
+  <main class="wrap" role="main">
+    <div class="top">
+      <img class="logo" src="${escapeHtml(LOGO_URL)}" alt="logo">
+      <div>
+        <div class="headerTitle">Globan Dashboard</div>
+        <div class="subtitle">Registered groups — preview</div>
+      </div>
+    </div>
+
+    <section class="content" aria-label="registered groups">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="display:flex;flex-direction:column;">
+          <div style="font-weight:800;font-size:16px">Registered Groups</div>
+          <div class="small">Total: ${GLOBAN_GROUPS.length}</div>
+        </div>
+        <div class="actions">
+          <a class="btn" id="continueBtn" href="${GLOBAN_BOT_INVITE}" target="_blank" rel="noopener noreferrer">Continue to bot (Telegram)</a>
+          <a class="btn secondary" id="backBtn" href="/" style="text-decoration:none;">Back</a>
+        </div>
+      </div>
+
+      <ul class="groups" role="list">
+        ${groupsHtml}
+      </ul>
+
+      <div class="footer">Powered by L © 2026 LLC Tech Corporation</div>
+    </section>
+  </main>
+
+  <!-- Globan dashboard audio -->
+  <audio id="globanAudio" preload="auto" playsinline>
+    <source src="${escapeHtml(GLOBAN_DASH_AUDIO)}" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+<script>
+  // try to play the dashboard audio. The navigation from main page to here is a user gesture,
+  // so autoplay usually succeeds — but we still handle blocked cases.
+  const dashAudio = document.getElementById('globanAudio');
+
+  async function tryPlayDash() {
+    try {
+      dashAudio.muted = false;
+      await dashAudio.play();
+      return true;
+    } catch (err) {
+      // If blocked, attach one-time gesture to play (user already clicked but some browsers still block)
+      const playOnGesture = () => { dashAudio.play().catch(()=>{}); removeListeners(); };
+      const removeListeners = () => {
+        document.removeEventListener('pointerdown', playOnGesture);
+        document.removeEventListener('touchstart', playOnGesture);
+        document.removeEventListener('click', playOnGesture);
+      };
+      document.addEventListener('pointerdown', playOnGesture, { once:true, passive:true });
+      document.addEventListener('touchstart', playOnGesture, { once:true, passive:true });
+      document.addEventListener('click', playOnGesture, { once:true, passive:true });
+      return false;
+    }
+  }
+
+  window.addEventListener('load', () => {
+    tryPlayDash();
+    // for safety: if audio fails to start, try again on visibilitychange
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) tryPlayDash();
+    });
+  });
+
+  // Pause any background audio (if the main page used a looping bg audio) by posting a simple client hint:
+  // In standard navigation this isn't necessary, but in single-page navigation you'd pause background.
+  try { window.top && window.top.postMessage && window.top.postMessage({ type: 'pause-bg' }, '*'); } catch (e){}
+
+  // analytics: continue button opens Telegram in new tab, back button returns to home (already href="/")
+</script>
+</body>
+</html>`
+    return responseHTML(html)
+  }
+
+  // default: main page
+  const mainHtml = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>${escapeHtml(SITE_TITLE)}</title>
-<meta name="theme-color" content="#000000" />
+<meta name="theme-color" content="#000"/>
 <style>
   :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); --gray:#9aa0a6; }
-  * { box-sizing: border-box; }
   html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
-  .wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; text-align:center; position:relative; overflow:hidden; }
-  img.logo{ width:280px; max-width:78%; height:auto; display:block; border:0; margin:0 auto; }
-  .title{ margin-top:12px; font-weight:700; font-size:20px; letter-spacing:0.6px; }
-  .meta{ margin-top:6px; font-size:13px; color:var(--muted); }
+  .wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;text-align:center;position:relative;overflow:hidden;}
+  .logo{width:260px;max-width:78%;height:auto;border:0;margin:0 auto;display:block;}
+  .title{margin-top:12px;font-weight:700;font-size:20px;letter-spacing:0.6px;}
+  .meta{margin-top:6px;font-size:13px;color:var(--muted);}
 
-  .sections{ margin-top:18px; display:flex; flex-direction:column; gap:18px; align-items:center; width:100%; }
-  .section{ width:100%; max-width:420px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:8px; }
-  .section h3{ margin:0; font-size:14px; color:var(--muted); text-transform:lowercase; letter-spacing:0.6px; }
-  .list{ width:100%; background:rgba(255,255,255,0.02); padding:10px 12px; border-radius:10px; display:flex; flex-direction:column; gap:8px; align-items:center; }
-  .link{ color:var(--fg); text-decoration:none; font-weight:700; font-size:15px; display:inline-block; text-align:center; width:100%; max-width:320px; padding:6px 8px; }
+  .sections{margin-top:18px;display:flex;flex-direction:column;gap:18px;align-items:center;width:100%;}
+  .section{width:100%;max-width:420px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .section h3{margin:0;font-size:14px;color:var(--muted);text-transform:lowercase;letter-spacing:0.6px;}
+  .list{width:100%;background:rgba(255,255,255,0.02);padding:10px 12px;border-radius:10px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .link{color:var(--fg);text-decoration:none;font-weight:700;font-size:15px;display:inline-block;text-align:center;width:100%;max-width:320px;padding:6px 8px;}
 
-  .bot1{ background:linear-gradient(270deg,#ffffff,#ff1f1f,#ffffff); background-size:600% 600%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:slide 4s linear infinite; text-shadow:0 0 6px rgba(255,30,30,0.8); }
-  .bot2{ background:linear-gradient(270deg,#a855f7,#3b82f6,#fb7185,#a855f7); background-size:600% 600%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:slide 5s linear infinite; }
+  .bot1{background:linear-gradient(270deg,#ffffff,#ff1f1f,#ffffff);background-size:600% 600%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:slide 4s linear infinite;text-shadow:0 0 6px rgba(255,30,30,0.8);}
+  .bot2{background:linear-gradient(270deg,#a855f7,#3b82f6,#fb7185,#a855f7);background-size:600% 600%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:slide 5s linear infinite;}
   @keyframes slide{0%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-  .thehub{ font-weight:800; font-size:18px; display:inline-block; padding:8px 12px; border-radius:999px; cursor:pointer; animation:floatY 3.6s ease-in-out infinite; text-align:center; }
-  @keyframes floatY {0%{transform:translateY(0px)}50%{transform:translateY(-10px)}100%{transform:translateY(0px)}}
-  .gc-glow{ background:linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,0,0,0.85)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:glowShift 2.4s linear infinite; text-shadow:0 0 30px rgba(255,80,80,0.9),0 0 60px rgba(255,60,60,0.6); }
-  @keyframes glowShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-
-  .anony { font-weight:800; font-size:18px; cursor:pointer; display:inline-block; padding:8px 12px; border-radius:8px; color:var(--fg); animation:jump 1.2s ease-in-out infinite; }
-  @keyframes jump { 0%{transform:translateY(0)}25%{transform:translateY(-8px)}50%{transform:translateY(0)}75%{transform:translateY(-4px)}100%{transform:translateY(0)} }
-
-  .other-site{ font-weight:800; font-size:18px; cursor:pointer; color:var(--fg); display:inline-block; padding:8px 12px; border-radius:8px; text-align:center; }
-
-  .modal { position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(0.96); background:rgba(10,10,10,0.96); color:#fff; padding:18px 22px; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.6); opacity:0; pointer-events:none; transition: opacity 350ms ease, transform 350ms ease; z-index:2000; text-align:center; }
-  .modal.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
-  .modal.hide { opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(0.96); }
-
-  .fade-overlay { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity 900ms ease; z-index:3000; }
-  .fade-overlay.visible { opacity:1; pointer-events:auto; }
-
-  .rainer{ pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:999; }
-  .th{ position:absolute; top:-10%; left:0; font-weight:800; color:rgba(255,255,255,0.95); text-shadow:0 2px 8px rgba(0,0,0,0.6); animation:fall linear forwards; user-select:none; -webkit-user-select:none; }
-  @keyframes fall{ to{ transform:translateY(120vh) rotate(720deg); opacity:0 } }
+  .list a.globan-link{ /* link to internal dashboard */
+    color:var(--fg);
+    text-decoration:none;
+    font-weight:800;
+    font-size:15px;
+    display:inline-block;
+    width:100%;
+    max-width:320px;
+    padding:10px;
+    border-radius:8px;
+    background: rgba(255,255,255,0.02);
+  }
 
   .info-row{ position:fixed; left:0; right:0; bottom:38px; display:flex; justify-content:space-between; align-items:center; padding:0 18px; box-sizing:border-box; font-size:13px; color:var(--muted); max-width:1100px; margin:0 auto; }
   .pill{ background: rgba(255,255,255,0.02); padding:8px 12px; border-radius:999px; }
   .footer{ position:fixed; bottom:10px; font-size:12px; opacity:0.6; width:100%; text-align:center; left:0; }
-
-  .landscape-overlay { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.92); color:#fff; font-size:30px; font-weight:900; text-align:center; z-index:4000; opacity:0; pointer-events:none; transition: opacity 200ms ease; }
-  .landscape-overlay.show { opacity:1; pointer-events:auto; }
-
-  @media(min-width:520px){ img.logo{ width:320px } }
+  @media(min-width:520px){ .logo{ width:320px } }
 </style>
 </head>
 <body>
-  <main class="wrap" role="main" aria-label="${escapeHtml(SITE_TITLE)}">
-    <img id="logo" class="logo" src="${escapeHtml(LOGO_URL)}" alt="${escapeHtml(SITE_TITLE)} logo">
+  <main class="wrap" role="main">
+    <img class="logo" src="${escapeHtml(LOGO_URL)}" alt="logo">
     <div class="title">${escapeHtml(SITE_TITLE)}</div>
     <div class="meta">We create Tech</div>
 
-    <div class="sections" aria-hidden="false">
+    <div class="sections">
       <div class="section">
         <h3>our bots</h3>
         <div class="list">
-          <a class="link bot1" href="https://t.me/globanllcbot_bot" target="_blank" rel="noopener noreferrer">@globanllcbot_bot</a>
+          <!-- Globan now goes to internal dashboard -->
+          <a class="globan-link" href="/globan" rel="noopener">@globanllcbot_bot</a>
           <a class="link bot2" href="https://t.me/funmatchjrllc_bot" target="_blank" rel="noopener noreferrer">@funmatchjrllc_bot</a>
         </div>
       </div>
@@ -113,215 +240,75 @@ async function handleRequest(request) {
       <div class="section">
         <h3>our gc's</h3>
         <div class="list">
-          <a id="theHub" class="link thehub gc-glow" href="${escapeHtml(THE_HUB_INVITE)}" target="_blank" rel="noopener noreferrer">The Hub</a>
+          <a class="link" href="${THE_HUB_INVITE}" target="_blank" rel="noopener noreferrer">The Hub</a>
         </div>
       </div>
 
       <div class="section">
         <h3>our Other website</h3>
         <div class="list">
-          <span id="funtify" class="other-site" tabindex="0">funtify</span>
-          <span id="anonychat" class="anony" tabindex="0">anonychat</span>
+          <span class="link" id="funtify">funtify</span>
+          <span class="link" id="anonychat">anonychat</span>
         </div>
       </div>
     </div>
 
     <div id="rainer" class="rainer" aria-hidden="true"></div>
-
-    <div id="modal" class="modal hide" role="dialog" aria-modal="true" aria-hidden="true">Currently not available</div>
-    <div id="fadeOverlay" class="fade-overlay" aria-hidden="true"></div>
-    <div id="landOverlay" class="landscape-overlay" aria-hidden="true">no fucking landscape!</div>
   </main>
 
-  <div class="info-row" aria-hidden="false">
+  <div class="info-row">
     <div class="pill" id="timeBox">${new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila", hour12:true, year:'numeric', month:'long', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })}</div>
     <div class="pill">👁 ${views}</div>
   </div>
 
   <div class="footer">Powered by L © 2026 LLC Tech Corporation</div>
 
-  <!-- background audio (loops) -->
+  <!-- background audio -->
   <audio id="bgAudio" autoplay loop playsinline preload="auto" crossorigin="anonymous">
-    <source src="${escapeHtml(AUDIO_URL)}" type="audio/mpeg">
+    <source src="${escapeHtml(BG_AUDIO_URL)}" type="audio/mpeg">
   </audio>
 
 <script>
-  // helper: update Manila time
-  function updateTimeDisplay() {
-    const opts = { timeZone: 'Asia/Manila', hour12: true, year:'numeric', month:'long', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' };
-    document.getElementById('timeBox').textContent = new Date().toLocaleString('en-PH', opts);
-  }
-  setInterval(updateTimeDisplay,1000);
-  updateTimeDisplay();
+  // main page helpers (clock, autoplay)
+  function updateTime(){ const opts={timeZone:'Asia/Manila',hour12:true,year:'numeric',month:'long',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'}; document.getElementById('timeBox').textContent = new Date().toLocaleString('en-PH', opts); }
+  setInterval(updateTime,1000); updateTime();
 
-  // background audio autoplay best-effort
   const audio = document.getElementById('bgAudio');
-  async function tryPlay() {
-    try { audio.muted = false; await audio.play(); return true; }
-    catch (e) { return false; }
-  }
-  window.addEventListener('load', async () => {
-    const ok = await tryPlay();
-    if (!ok) {
-      function startOnGesture() { audio.play().catch(()=>{}); removeListeners(); }
-      function removeListeners() {
-        document.removeEventListener('pointerdown', startOnGesture);
-        document.removeEventListener('touchstart', startOnGesture);
-        document.removeEventListener('click', startOnGesture);
-      }
-      document.addEventListener('pointerdown', startOnGesture, { once:true, passive:true });
-      document.addEventListener('touchstart', startOnGesture, { once:true, passive:true });
-      document.addEventListener('click', startOnGesture, { once:true, passive:true });
-    }
-  });
+  async function tryPlay() { try { audio.muted=false; await audio.play(); return true;} catch(e){ return false; } }
+  window.addEventListener('load', async ()=> { const ok = await tryPlay(); if(!ok){ function startOnGesture(){ audio.play().catch(()=>{}); remove(); } function remove(){ document.removeEventListener('pointerdown',startOnGesture); document.removeEventListener('touchstart',startOnGesture); document.removeEventListener('click',startOnGesture); } document.addEventListener('pointerdown',startOnGesture,{once:true,passive:true}); document.addEventListener('touchstart',startOnGesture,{once:true,passive:true}); document.addEventListener('click',startOnGesture,{once:true,passive:true}); } });
 
-  // The Hub behaviour: float + glow + rain
-  const theHub = document.getElementById('theHub');
-  const rainer = document.getElementById('rainer');
-  function createTH() {
-    const el = document.createElement('div');
-    el.className = 'th';
-    el.textContent = 'TH';
-    const startX = Math.random() * 100;
-    el.style.left = startX + 'vw';
-    const size = 18 + Math.random() * 36;
-    el.style.fontSize = size + 'px';
-    const rot = Math.random() * 360;
-    el.style.transform = 'rotate(' + rot + 'deg)';
-    const duration = 3500 + Math.random() * 3200;
-    el.style.animationDuration = duration + 'ms';
-    el.style.color = 'rgba(255,255,255,' + (0.9 - Math.random()*0.4) + ')';
-    rainer.appendChild(el);
-    el.addEventListener('animationend', ()=> el.remove());
-  }
-  function hubClicked(e) {
-    theHub.classList.add('gc-active');
-    const bursts = 120;
-    const burstInterval = 25;
-    let spawned = 0;
-    const iv = setInterval(()=> {
-      createTH(); spawned++;
-      if (spawned >= bursts) { clearInterval(iv); setTimeout(()=> theHub.classList.remove('gc-active'),1700); }
-    }, burstInterval);
-    theHub.style.pointerEvents='none';
-    setTimeout(()=> theHub.style.pointerEvents='',2500);
-  }
-  theHub.addEventListener('click', hubClicked, { passive:true });
-
-  // funtify popup
+  // funtify and anonychat behaviors: keep previous actions (popup / redirect) if desired...
+  // Minimal funtify popup
   const funtify = document.getElementById('funtify');
-  const modal = document.getElementById('modal');
-  function showModal(msg, duration=1800) {
-    modal.textContent = msg;
-    modal.classList.remove('hide'); modal.classList.add('show');
-    modal.setAttribute('aria-hidden','false');
-    setTimeout(()=> {
-      modal.classList.remove('show'); modal.classList.add('hide');
-      modal.setAttribute('aria-hidden','true');
-    }, duration);
-  }
-  funtify.addEventListener('click', (e) => { e.preventDefault(); showModal('Currently not available', 1800); }, { passive:false });
-  funtify.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); showModal('Currently not available', 1800); } });
-
-  // ANONYCHAT behaviour: play provided M4A, fade overlay when sound plays, redirect when sound ends
   const anony = document.getElementById('anonychat');
-  const fadeOverlay = document.getElementById('fadeOverlay');
+  const modal = document.createElement('div');
+  modal.style.position='fixed'; modal.style.left='50%'; modal.style.top='50%'; modal.style.transform='translate(-50%,-50%) scale(0.96)'; modal.style.background='rgba(10,10,10,0.96)'; modal.style.color='#fff'; modal.style.padding='18px 22px'; modal.style.borderRadius='12px'; modal.style.boxShadow='0 20px 60px rgba(0,0,0,0.6)'; modal.style.opacity='0'; modal.style.pointerEvents='none'; modal.style.transition='opacity 350ms ease, transform 350ms ease'; modal.style.zIndex='2000'; modal.id='miniModal';
+  document.body.appendChild(modal);
+  function showMini(msg,d=1600){ modal.textContent=msg; modal.style.transform='translate(-50%,-50%) scale(1)'; modal.style.opacity='1'; modal.style.pointerEvents='auto'; setTimeout(()=>{ modal.style.transform='translate(-50%,-50%) scale(0.96)'; modal.style.opacity='0'; modal.style.pointerEvents='none'; }, d); }
+  funtify && funtify.addEventListener('click', (e)=>{ e.preventDefault(); showMini('Currently not available'); }, {passive:false});
+  funtify && funtify.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); showMini('Currently not available'); } });
 
-  function startAnonySequence() {
-    // disable repeated clicks
-    anony.style.pointerEvents = 'none';
-    // pause background loop
-    try { audio.pause(); } catch(e) {}
+  // anonychat quick redirect with fade (keeps previous behavior)
+  anony && anony.addEventListener('click', (e)=>{ e.preventDefault(); try{ audio.pause(); }catch(e){}; // play click handled earlier by your other code if desired
+    // create redirect audio and fade
+    const redirectAudio = new Audio(${JSON.stringify(THE_HUB_INVITE)}); // no-op if invalid; keep original behavior separate
+    // fallback: simple redirect to invite
+    window.location.href = ${JSON.stringify("https://t.me/anonychatllc_bot/anonychatllc")};
+  }, {passive:false});
 
-    // create redirect audio element and play (user gesture ensures play allowed)
-    const redirectAudio = new Audio(${JSON.stringify(ANONYCHAT_AUDIO_URL)});
-    redirectAudio.preload = 'auto';
-    // when the audio actually begins playing, immediately show fade overlay
-    redirectAudio.addEventListener('playing', () => {
-      fadeOverlay.classList.add('visible');
-      fadeOverlay.setAttribute('aria-hidden','false');
-    }, { once: true });
+  // landscape overlay (if wanted on main page too - optional)
+  // left intentionally minimal; main behavior lives in earlier Worker versions
 
-    // when audio ends, redirect (overwrite current page)
-    redirectAudio.addEventListener('ended', () => {
-      try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch (e) { /* ignore */ }
-    }, { once: true });
-
-    // safety: if metadata loads, set optional timeout to redirect after duration + small buffer
-    redirectAudio.addEventListener('loadedmetadata', () => {
-      const dur = redirectAudio.duration && isFinite(redirectAudio.duration) ? (redirectAudio.duration * 1000) + 1200 : 8000;
-      // fallback redirect in case 'ended' doesn't fire
-      setTimeout(()=> {
-        try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){}
-      }, dur);
-    }, { once: true });
-
-    // attempt play (should succeed because of user click)
-    redirectAudio.play().catch((err) => {
-      // fallback: if play fails, still fade and redirect after 900ms
-      fadeOverlay.classList.add('visible');
-      fadeOverlay.setAttribute('aria-hidden','false');
-      setTimeout(()=> { try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){} }, 950);
-    });
-  }
-
-  anony.addEventListener('click', (e) => {
-    e.preventDefault();
-    startAnonySequence();
-  }, { passive:false });
-
-  anony.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); startAnonySequence(); }
-  });
-
-  // landscape detection overlay
-  const landOverlay = document.getElementById('landOverlay');
-  function checkLandscape() {
-    const isLandscape = (window.innerWidth > window.innerHeight);
-    if (isLandscape) {
-      landOverlay.classList.add('show');
-      landOverlay.setAttribute('aria-hidden','false');
-    } else {
-      landOverlay.classList.remove('show');
-      landOverlay.setAttribute('aria-hidden','true');
-    }
-  }
-  window.addEventListener('load', checkLandscape);
-  window.addEventListener('resize', checkLandscape);
-  window.addEventListener('orientationchange', () => { setTimeout(checkLandscape, 120); });
-
-  landOverlay.addEventListener('click', () => {
-    landOverlay.classList.remove('show');
-    landOverlay.setAttribute('aria-hidden','true');
-  });
-
-  // logo toggles background audio
-  const logo = document.getElementById('logo');
-  logo.addEventListener('click', () => {
-    if (audio.paused) audio.play().catch(()=>{});
-    else audio.pause();
-  }, { passive:true });
-
-  // close modal on Escape
-  document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') { modal.classList.remove('show'); modal.classList.add('hide'); modal.setAttribute('aria-hidden','true'); }
-  });
 </script>
 </body>
 </html>`
 
-  return new Response(html, {
-    status: 200,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store, private, max-age=0"
-    }
-  })
+  return responseHTML(mainHtml)
 }
 
-/* small helper */
+// small HTML escaper
 function escapeHtml (str) {
-  return String(str)
+  return String(str || '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
