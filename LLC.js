@@ -15,7 +15,7 @@ const ANONYCHAT_AUDIO_URL = "https://image2url.com/r2/default/audio/177202671389
 const KV_KEY = "views"
 /* end config */
 
-/* registered groups list for Globan dashboard */
+/* registered groups for Globan dashboard */
 const GLOBAN_GROUPS = [
   "• ⌜💘⌟ 𝓐𝓯𝓪𝓶𝐇𝐔�NT𝐄𝐑𝐙",
   "• ⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ᴘʀᴇᴍɪᴜᴍ",
@@ -141,9 +141,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
 <script>
   // prevent long-press contextmenu / selection
   document.addEventListener('contextmenu', e => e.preventDefault());
-  document.addEventListener('touchstart', e => { /* allow gestures but prevent default long-press menu on some devices */ }, { passive:true });
+  document.addEventListener('touchstart', e => { /* passive */ }, { passive:true });
   document.documentElement.style.webkitTouchCallout = 'none';
   document.documentElement.style.webkitUserSelect = 'none';
+  document.addEventListener('selectstart', e => e.preventDefault());
 
   // try to play dashboard audio once (no loop). navigation to here is a user gesture so it should usually start.
   const dash = document.getElementById('globanAudio');
@@ -152,33 +153,27 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
       dash.muted = false;
       await dash.play();
     } catch (err) {
-      // if blocked, attach single gesture listener
       const handler = () => { dash.play().catch(()=>{}); document.removeEventListener('pointerdown', handler); };
       document.addEventListener('pointerdown', handler, { once:true, passive:true });
     }
   }
   window.addEventListener('load', tryPlayDash);
 
-  // Continue button: open Telegram in a new tab/window (use JS so it isn't an anchor that long-press reveals easily)
+  // Continue button opens Telegram in new tab (JS to avoid easy long-press reveal)
   document.getElementById('continueBtn').addEventListener('click', () => {
-    // open in new tab/window
     try { window.open(${JSON.stringify(GLOBAN_BOT_INVITE)}, '_blank', 'noopener'); } catch (e) { window.location.href = ${JSON.stringify(GLOBAN_BOT_INVITE)}; }
   });
 
   // Back button: go back to homepage
   document.getElementById('backBtn').addEventListener('click', () => {
-    // pause dash audio
     try { dash.pause(); } catch(e){}
     window.location.href = '/';
   });
 
-  // Block long press reveal attempts on this page
+  // prevent long-press reveal on this page
   ['mouseup','mousedown','touchstart','touchend','contextmenu'].forEach(evt => {
     document.addEventListener(evt, e => { /* noop to consume */ }, { passive:true });
   });
-
-  // also disable selection via keyboard
-  document.addEventListener('selectstart', e => e.preventDefault());
 </script>
 </body>
 </html>`
@@ -290,7 +285,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
 </audio>
 
 <script>
-  // Block page-level context menu and selection to reduce long-press reveal
+  // Block page-level context menu and selection
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('selectstart', e => e.preventDefault());
   document.documentElement.style.webkitTouchCallout = 'none';
@@ -325,34 +320,26 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
     }
   });
 
-  // Helper that prevents long-press reveal on target by using JS navigation and pausing bg audio
-  function safeNavigate(targetUrl) {
-    try { bgAudio.pause(); } catch (e) {}
-    // small delay to ensure audio pauses before navigation
-    setTimeout(()=> { window.location.href = targetUrl; }, 80);
-  }
-
-  // Globan button: navigate to internal dashboard /globan via JS (not anchor)
+  // Globan button => internal /globan (JS navigation)
   const globanBtn = document.getElementById('globanBtn');
   globanBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    // Pause bg audio and navigate. This click is a user gesture so the dashboard audio should play.
     try { bgAudio.pause(); } catch(e){}
-    window.location.href = '/globan';
+    // small delay to ensure audio pauses before navigation
+    setTimeout(()=> { window.location.href = '/globan'; }, 80);
   }, { passive:false });
 
-  // Funmatch button: open external telegram in new tab using JS to avoid anchor long-press
+  // Funmatch button: open external telegram in new tab using JS
   const funmatchBtn = document.getElementById('funmatchBtn');
   funmatchBtn.addEventListener('click', (e) => {
     e.preventDefault();
     try { window.open('https://t.me/funmatchjrllc_bot', '_blank', 'noopener'); } catch (err) { window.location.href = 'https://t.me/funmatchjrllc_bot'; }
   }, { passive:false });
 
-  // The Hub button: open invite in new tab; also trigger hub animation/rain (same as before)
+  // The Hub button: small burst and open invite
   const theHubBtn = document.getElementById('theHubBtn');
   theHubBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    // spawn same TH effect as before
     const rainer = document.getElementById('rainer');
     function createTH() {
       const el = document.createElement('div'); el.className='th'; el.textContent='TH';
@@ -363,15 +350,13 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
       el.style.color = 'rgba(255,255,255,' + (0.9 - Math.random()*0.4) + ')';
       rainer.appendChild(el); el.addEventListener('animationend', ()=> el.remove());
     }
-    // small burst
     for (let i=0;i<24;i++) setTimeout(createTH, i*30 + Math.random()*120);
-    // open invite in new tab (JS) after a tiny delay
     setTimeout(()=> {
       try { window.open(${JSON.stringify(THE_HUB_INVITE)}, '_blank', 'noopener'); } catch (err) { window.location.href = ${JSON.stringify(THE_HUB_INVITE)}; }
     }, 220);
   }, { passive:false });
 
-  // funtify popup (fade in/out)
+  // funtify popup
   const funtifyBtn = document.getElementById('funtify');
   const modal = document.getElementById('modal');
   function showModal(msg, duration=1800) {
@@ -383,8 +368,25 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:
   funtifyBtn && funtifyBtn.addEventListener('click', (e)=> { e.preventDefault(); showModal('Currently not available'); }, { passive:false });
   funtifyBtn && funtifyBtn.addEventListener('keydown', (ev)=> { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); showModal('Currently not available'); } });
 
-  // anonychat: play redirect audio (M4A) and fade & redirect when audio plays/ends
+  // anonychat: play redirect audio and fade & redirect
   const anonyBtn = document.getElementById('anonychat');
   const fadeOverlay = document.getElementById('fadeOverlay');
   async function startAnonySequence() {
-    anonyBtn.style.pointerEv
+    anonyBtn.style.pointerEvents = 'none';
+    try { bgAudio.pause(); } catch(e){}
+    const redirectAudio = new Audio(${JSON.stringify(ANONYCHAT_AUDIO_URL)});
+    redirectAudio.preload = 'auto';
+    redirectAudio.addEventListener('playing', ()=> {
+      fadeOverlay.classList.add('visible'); fadeOverlay.setAttribute('aria-hidden','false');
+    }, { once:true });
+    redirectAudio.addEventListener('ended', ()=> {
+      try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){}
+    }, { once:true });
+    redirectAudio.addEventListener('error', ()=> {
+      fadeOverlay.classList.add('visible'); setTimeout(()=> { try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){} }, 900);
+    }, { once:true });
+    try {
+      await redirectAudio.play();
+    } catch (err) {
+      fadeOverlay.classList.add('visible');
+      setTimeout(()=> {
