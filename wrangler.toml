@@ -1,3 +1,3 @@
 name = ""
-main = "cloudflare-worker.js"
+main = "cloudflare-worker1.js"
 compatibility_date = "2026-02-21"
