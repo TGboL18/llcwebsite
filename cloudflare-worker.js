@@ -16,11 +16,35 @@ const ANONYCHAT_AUDIO_URL = "https://image2url.com/r2/default/audio/177202671389
 const GLOBAN_BOT_URL = "https://t.me/globanllcbot_bot"
 // Webhook for appeals
 const APPEAL_WEBHOOK_URL = "https://your-worker.subdomain.workers.dev/webhook/appeal"
-const APPEAL_WEBHOOK_SECRET = "YOUR_WEBHOOK_SECRET_KEY"
+const APPEAL_WEBHOOK_SECRET = "globan192026"
 const KV_KEY = "views"
 /* end config */
 
 let fallbackViews = 0
+
+// Registered groups for globan dashboard
+const REGISTERED_GROUPS = [
+  "⌜💘⌟ 𝓐𝓯𝓪𝓶𝐇𝐔𝐍𝐓𝐄𝐑𝐙",
+  "⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ᴘʀᴇᴍɪᴜᴍ",
+  "⌜️🏆⌟ 𝐕𝐀𝐑𝐒𝐈𝐓𝐘 ᴘʜ",
+  "[ 𝗧𝗔𝗠𝗕𝗔𝗬𝗔𝗡 𝗡𝗚 𝗠𝗚𝗔 𝗕𝗔𝗗𝗜𝗡𝗚 ]",
+  "𝐂𝐚𝐦𝐩𝐮𝐬 𝐨𝐟 𝐆𝐨𝐝𝐝𝐞𝐬𝐬",
+  "🅦 𝙷𝙸𝙳𝙴𝙾𝚄𝚃",
+  "🇹𝖍𝖊 🇭✧🇴✧🇰",
+  "𝕱𝖀𝕭𝖀 | 𝐅𝐮𝐧 𝐁𝐮𝐝𝐝𝐲",
+  "𝐍𝐀𝐍𝐍𝐎'𝐒 𝐒𝐀𝐍𝐂𝐓𝐔𝐀𝐑𝐘",
+  "𝑯𝑶𝑹𝑵𝒀 𝑪𝑰𝑻𝒀",
+  "『 𝐂𝐇𝐀𝐓 𝐍' 𝐂𝐇𝐈𝐋𝐋 』",
+  "『 𝗞𝗔𝗟𝗔𝗧 𝗚𝗔𝗟𝗟𝗘𝗥𝗜𝗔 』",
+  "𝙎𝙖𝙣𝙜'𝙜𝙧𝙚 𝙇𝙪𝙭𝙚 𝙎𝙤𝙘𝙞𝙚𝙩𝙮🦋",
+  "☬Ë™️|☞Escape The Mercy☜",
+  "⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ғʀᴇᴍɪᴜᴍ",
+  "《◇TROPAPIP'Z 8.O◇》",
+  "Music jam",
+  "『 𝗦𝗔𝗡𝗚𝗚𝗨𝗡𝗜𝗔𝗡𝗚 𝗞𝗔𝗟𝗜𝗕𝗨𝗚𝗔𝗡 』",
+  "『 𝑻𝒉𝒆 𝑨𝒓𝒄𝒉𝒊𝒗𝒆𝒔 』",
+  "Pinoy Bi Hub"
+]
 
 async function getAndIncrementViews() {
   try {
@@ -47,6 +71,10 @@ async function handleRequest(request) {
   if (request.method !== "GET") return new Response(null, { status: 405 })
 
   const views = await getAndIncrementViews()
+
+  const groupsHtml = REGISTERED_GROUPS.map(group => 
+    `<div class="group-item">${escapeHtml(group)}</div>`
+  ).join('')
 
   const html = `<!doctype html>
 <html lang="en">
@@ -89,7 +117,7 @@ async function handleRequest(request) {
   .modal.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
   .modal.hide { opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(0.96); }
 
-  .fade-overlay { position:fixed; inset:#000; opacity:0; pointer:0; background-events:none; transition: opacity 900ms ease; z-index:3000; }
+  .fade-overlay { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity 900ms ease; z-index:3000; }
   .fade-overlay.visible { opacity:1; pointer-events:auto; }
 
   .rainer{ pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:999; }
@@ -114,15 +142,22 @@ async function handleRequest(request) {
   .dashboard-title { font-size:26px; font-weight:800; margin-bottom:6px; background:linear-gradient(90deg, #ff1f1f, #ffffff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
   .dashboard-subtitle { font-size:13px; color:var(--muted); margin-bottom:20px; }
   
-  .dashboard-form { width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px; }
+  .dashboard-groups { width:100%; max-width:420px; max-height:25vh; overflow-y:auto; background:rgba(255,255,255,0.03); border-radius:16px; padding:12px; display:flex; flex-direction:column; gap:6px; margin-bottom:20px; }
+  .dashboard-groups::-webkit-scrollbar { width:6px; }
+  .dashboard-groups::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:3px; }
+  .dashboard-groups::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:3px; }
+  
+  .group-item { background:rgba(255,255,255,0.06); padding:10px 12px; border-radius:8px; font-size:12px; font-weight:600; text-align:left; word-break:break-word; }
+
+  .dashboard-form { width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px; margin-bottom:15px; }
   .form-group { text-align:left; }
   .form-label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600; }
   .form-input { width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 15px; color:#fff; font-size:14px; font-family:inherit; outline:none; transition: border-color 0.2s, background 0.2s; }
   .form-input:focus { border-color:var(--accent); background:rgba(255,255,255,0.12); }
   .form-input::placeholder { color:rgba(255,255,255,0.4); }
-  textarea.form-input { resize:vertical; min-height:100px; }
+  textarea.form-input { resize:vertical; min-height:80px; }
   
-  .dashboard-btn { background:linear-gradient(135deg, #ff1f1f, #ff5050); color:#fff; font-weight:800; font-size:15px; padding:14px 28px; border:none; border-radius:50px; cursor:pointer; text-decoration:none; display:inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(255,31,31,0.4); margin-top:8px; }
+  .dashboard-btn { background:linear-gradient(135deg, #ff1f1f, #ff5050); color:#fff; font-weight:800; font-size:14px; padding:12px 24px; border:none; border-radius:50px; cursor:pointer; text-decoration:none; display:inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(255,31,31,0.4); margin:4px; }
   .dashboard-btn:hover { transform:scale(1.03); box-shadow:0 6px 30px rgba(255,31,31,0.6); }
   .dashboard-btn:active { transform:scale(0.98); }
   .dashboard-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
@@ -138,6 +173,8 @@ async function handleRequest(request) {
 
   .success-message { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#22c55e; padding:12px 16px; border-radius:10px; font-size:13px; margin-top:10px; }
   .error-message { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:12px 16px; border-radius:10px; font-size:13px; margin-top:10px; }
+
+  .button-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
   @media(min-width:520px){ img.logo{ width:320px } }
 </style>
@@ -180,14 +217,18 @@ async function handleRequest(request) {
     <div id="landOverlay" class="landscape-overlay" aria-hidden="true">no fucking landscape!</div>
   </main>
 
-  <!-- Send Appeal Dashboard -->
+  <!-- Globan Dashboard -->
   <div id="dashboardOverlay" class="dashboard-overlay">
     <button id="closeDashboard" class="dashboard-close">&times;</button>
     <img class="dashboard-logo" src="${escapeHtml(LOGO_URL)}" alt="Logo">
-    <div class="dashboard-title">Send Appeal</div>
-    <div class="dashboard-subtitle">Submit your appeal to the bot administrators</div>
+    <div class="dashboard-title">GLOBAN</div>
+    <div class="dashboard-subtitle">Registered Groups</div>
     
-    <div class="user-info" id="userInfo">
+    <div class="dashboard-groups">
+      ${groupsHtml}
+    </div>
+    
+    <div class="user-info" id="userInfo" style="display:none;">
       <div class="user-avatar" id="userAvatar">?</div>
       <div class="user-details">
         <div class="user-name" id="userName">Loading...</div>
@@ -195,19 +236,20 @@ async function handleRequest(request) {
       </div>
     </div>
     
-    <form class="dashboard-form" id="appealForm">
+    <form class="dashboard-form" id="appealForm" style="display:none;">
       <div class="form-group">
         <label class="form-label">Your Appeal Message</label>
         <textarea class="form-input" id="appealMessage" placeholder="Explain your situation and why you should be unbanned..." required></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Contact Info (Optional)</label>
-        <input type="text" class="form-input" id="contactInfo" placeholder="Email, Telegram, or other contact method">
       </div>
       <button type="submit" class="dashboard-btn" id="submitAppeal">Submit Appeal</button>
     </form>
     
     <div id="formMessage"></div>
+    
+    <div class="button-row">
+      <a id="continueToBot" class="dashboard-btn dashboard-btn-secondary" href="${escapeHtml(GLOBAN_BOT_URL)}" target="_blank" rel="noopener noreferrer">Continue to Bot</a>
+      <button id="showAppealBtn" class="dashboard-btn">Submit Appeal</button>
+    </div>
   </div>
 
   <div class="info-row" aria-hidden="false">
@@ -409,22 +451,25 @@ async function handleRequest(request) {
     }
   });
 
-  // ========== Send Appeal Dashboard Functionality ==========
+  // ========== Globan Dashboard Functionality ==========
   const globanBot = document.getElementById('globanBot');
   const dashboardOverlay = document.getElementById('dashboardOverlay');
   const closeDashboardBtn = document.getElementById('closeDashboard');
   const appealForm = document.getElementById('appealForm');
   const formMessage = document.getElementById('formMessage');
   const submitBtn = document.getElementById('submitAppeal');
+  const showAppealBtn = document.getElementById('showAppealBtn');
+  const continueToBot = document.getElementById('continueToBot');
+  const userInfoEl = document.getElementById('userInfo');
   
-  // Get user info from Telegram WebApp or prompt
+  // Auto-detect user info from Telegram WebApp
   let userData = {
     user_id: '',
     username: '',
     first_name: ''
   };
 
-  function getUserInfo() {
+  function detectUserInfo() {
     // Try to get info from Telegram WebApp
     if (typeof telegram !== 'undefined' && telegram.WebApp) {
       const user = telegram.WebApp.initDataUnsafe?.user;
@@ -437,20 +482,17 @@ async function handleRequest(request) {
       }
     }
     
-    // Update UI
-    const userNameEl = document.getElementById('userName');
-    const userIdEl = document.getElementById('userId');
-    const userAvatarEl = document.getElementById('userAvatar');
-    
-    if (userData.first_name) {
+    // Update UI if user data is available
+    if (userData.user_id) {
+      const userNameEl = document.getElementById('userName');
+      const userIdEl = document.getElementById('userId');
+      const userAvatarEl = document.getElementById('userAvatar');
+      
       userNameEl.textContent = userData.first_name + (userData.username ? ' (@' + userData.username + ')' : '');
       userIdEl.textContent = 'ID: ' + userData.user_id;
       userAvatarEl.textContent = userData.first_name.charAt(0).toUpperCase();
-    } else {
-      // Prompt for user info if not available from Telegram
-      userNameEl.textContent = 'Enter your info';
-      userIdEl.textContent = 'ID: Not detected';
-      userAvatarEl.textContent = '?';
+      
+      userInfoEl.style.display = 'flex';
     }
   }
 
@@ -460,8 +502,14 @@ async function handleRequest(request) {
     document.body.style.overflow = 'hidden';
     history.pushState({dashboard: true}, document.title, location.href);
     
-    // Get user info
-    getUserInfo();
+    // Reset to initial state
+    appealForm.style.display = 'none';
+    formMessage.innerHTML = '';
+    showAppealBtn.textContent = 'Submit Appeal';
+    showAppealBtn.style.display = 'inline-block';
+    
+    // Auto-detect user info
+    detectUserInfo();
   }
 
   function closeDashboard() {
@@ -472,9 +520,9 @@ async function handleRequest(request) {
     
     // Reset form
     appealForm.reset();
+    appealForm.style.display = 'none';
     formMessage.innerHTML = '';
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Submit Appeal';
+    showAppealBtn.style.display = 'inline-block';
   }
 
   globanBot.addEventListener('click', (e) => {
@@ -501,30 +549,38 @@ async function handleRequest(request) {
     }
   });
 
+  // Show appeal form
+  showAppealBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    showAppealBtn.style.display = 'none';
+    appealForm.style.display = 'flex';
+    
+    // Ensure user info is detected
+    detectUserInfo();
+  });
+
+  // Continue to bot button
+  continueToBot.addEventListener('click', () => {
+    setTimeout(() => {
+      closeDashboard();
+    }, 100);
+  });
+
   // Handle form submission
   appealForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const appealMessage = document.getElementById('appealMessage').value.trim();
-    const contactInfo = document.getElementById('contactInfo').value.trim();
     
     if (!appealMessage) {
       formMessage.innerHTML = '<div class="error-message">Please enter your appeal message</div>';
       return;
     }
     
-    // If user info not available from Telegram, try to get from form inputs
-    let finalUserData = { ...userData };
-    
-    if (!finalUserData.user_id) {
-      finalUserData.user_id = prompt('Please enter your Telegram User ID:') || 'unknown';
-      finalUserData.username = prompt('Please enter your Telegram username (without @):') || '';
-      finalUserData.first_name = prompt('Please enter your name:') || 'User';
-      
-      // Update UI
-      document.getElementById('userName').textContent = finalUserData.first_name + (finalUserData.username ? ' (@' + finalUserData.username + ')' : '');
-      document.getElementById('userId').textContent = 'ID: ' + finalUserData.user_id;
-      document.getElementById('userAvatar').textContent = finalUserData.first_name.charAt(0).toUpperCase();
+    // Check if user info is available
+    if (!userData.user_id) {
+      formMessage.innerHTML = '<div class="error-message">Please open this page from Telegram to submit an appeal.</div>';
+      return;
     }
     
     submitBtn.disabled = true;
@@ -532,11 +588,10 @@ async function handleRequest(request) {
     formMessage.innerHTML = '';
     
     const appealData = {
-      user_id: finalUserData.user_id,
-      username: finalUserData.username,
-      first_name: finalUserData.first_name,
+      user_id: userData.user_id,
+      username: userData.username,
+      first_name: userData.first_name,
       appeal_message: appealMessage,
-      contact_info: contactInfo,
       timestamp: new Date().toISOString()
     };
     
