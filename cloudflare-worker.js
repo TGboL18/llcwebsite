@@ -12,38 +12,15 @@ const THE_HUB_INVITE = "https://t.me/+7AcFN8RMcnc5N2U1"
 const ANONYCHAT_INVITE = "https://t.me/anonychatllc_bot/anonychatllc"
 // audio to play before redirect (the M4A you provided)
 const ANONYCHAT_AUDIO_URL = "https://image2url.com/r2/default/audio/1772026713893-31ad5447-91c0-4842-8c51-b03c2331cf60.m4a"
-// Globan bot dashboard audio
-const GLOBAN_DASHBOARD_AUDIO = "https://image2url.com/r2/default/audio/1772110775520-55e0902b-b85b-46e2-80e0-a5ff971dda44.m4a"
 // Globan bot link
 const GLOBAN_BOT_URL = "https://t.me/globanllcbot_bot"
+// Webhook for appeals
+const APPEAL_WEBHOOK_URL = "https://your-worker.subdomain.workers.dev/webhook/appeal"
+const APPEAL_WEBHOOK_SECRET = "YOUR_WEBHOOK_SECRET_KEY"
 const KV_KEY = "views"
 /* end config */
 
 let fallbackViews = 0
-
-// Registered groups for globan dashboard
-const REGISTERED_GROUPS = [
-  "⌜💘⌟ 𝓐𝓯𝓪𝓶𝐇𝐔𝐍𝐓𝐄𝐑𝐙",
-  "⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ᴘʀᴇᴍɪᴜᴍ",
-  "⌜️🏆⌟ 𝐕𝐀𝐑𝐒𝐈𝐓𝐘 ᴘʜ",
-  "[ 𝗧𝗔𝗠𝗕𝗔𝗬𝗔𝗡 𝗡𝗚 𝗠𝗚𝗔 𝗕𝗔𝗗𝗜𝗡𝗚 ]",
-  "𝐂𝐚𝐦𝐩𝐮𝐬 𝐨𝐟 𝐆𝐨𝐝𝐝𝐞𝐬𝐬",
-  "🅦 𝙷𝙸𝙳𝙴𝙾𝚄𝚃",
-  "🇹𝖍𝖊 🇭✧🇴✧🇰",
-  "𝕱𝖀𝕭𝖀 | 𝐅𝐮𝐧 𝐁𝐮𝐝𝐝𝐲",
-  "𝐍𝐀𝐍𝐍𝐎'𝐒 𝐒𝐀𝐍𝐂𝐓𝐔𝐀𝐑𝐘",
-  "𝑯𝑶𝑹𝑵𝒀 𝑪𝑰𝑻𝒀",
-  "『 𝐂𝐇𝐀𝐓 𝐍' 𝐂𝐇𝐈𝐋𝐋 』",
-  "『 𝗞𝗔𝗟𝗔𝗧 𝗚𝗔𝗟𝗟𝗘𝗥𝗜𝗔 』",
-  "𝙎𝙖𝙣𝙜'𝙜𝙧𝙚 𝙇𝙪𝙭𝙚 𝙎𝙤𝙘𝙞𝙚𝙩𝙮🦋",
-  "☬Ë™️|☞Escape The Mercy☜",
-  "⌜⌟ 𝐓𝐀𝐌🫟𝐃𝓮𝓻𝓸 ғʀᴇᴍɪᴜᴍ",
-  "《◇TROPAPIP'Z 8.O◇》",
-  "Music jam",
-  "『 𝗦𝗔𝗡𝗚𝗚𝗨𝗡𝗜𝗔𝗡𝗚 𝗞𝗔𝗟𝗜𝗕𝗨𝗚𝗔𝗡 』",
-  "『 𝑻𝒉𝒆 𝑨𝒓𝒄𝒉𝒊𝒗𝒆𝒔 』",
-  "Pinoy Bi Hub"
-]
 
 async function getAndIncrementViews() {
   try {
@@ -62,13 +39,14 @@ async function getAndIncrementViews() {
 }
 
 async function handleRequest(request) {
+  // Handle webhook endpoint for appeals
+  if (request.url.includes("/webhook/appeal")) {
+    return handleAppealWebhook(request)
+  }
+  
   if (request.method !== "GET") return new Response(null, { status: 405 })
 
   const views = await getAndIncrementViews()
-
-  const groupsHtml = REGISTERED_GROUPS.map(group => 
-    `<div class="group-item">${escapeHtml(group)}</div>`
-  ).join('')
 
   const html = `<!doctype html>
 <html lang="en">
@@ -79,7 +57,7 @@ async function handleRequest(request) {
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="no-referrer" />
 <style>
-  :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); --gray:#9aa0a6; }
+  :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); --gray:#9aa0a6; --accent:#ff1f1f; --accent2:#a855f7; }
   * { box-sizing: border-box; }
   html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased;}
   .wrap { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; text-align:center; position:relative; overflow:hidden; }
@@ -111,7 +89,7 @@ async function handleRequest(request) {
   .modal.show { opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
   .modal.hide { opacity:0; pointer-events:none; transform:translate(-50%,-50%) scale(0.96); }
 
-  .fade-overlay { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity 900ms ease; z-index:3000; }
+  .fade-overlay { position:fixed; inset:#000; opacity:0; pointer:0; background-events:none; transition: opacity 900ms ease; z-index:3000; }
   .fade-overlay.visible { opacity:1; pointer-events:auto; }
 
   .rainer{ pointer-events:none; position:fixed; inset:0; overflow:hidden; z-index:999; }
@@ -132,22 +110,34 @@ async function handleRequest(request) {
   .dashboard-close { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:24px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .dashboard-close:hover { background:rgba(255,255,255,0.2); }
   
-  .dashboard-logo { width:200px; max-width:70%; height:auto; margin-bottom:20px; }
-  .dashboard-title { font-size:28px; font-weight:800; margin-bottom:8px; background:linear-gradient(90deg, #ff1f1f, #ffffff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .dashboard-subtitle { font-size:14px; color:var(--muted); margin-bottom:25px; }
+  .dashboard-logo { width:180px; max-width:60%; height:auto; margin-bottom:15px; }
+  .dashboard-title { font-size:26px; font-weight:800; margin-bottom:6px; background:linear-gradient(90deg, #ff1f1f, #ffffff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .dashboard-subtitle { font-size:13px; color:var(--muted); margin-bottom:20px; }
   
-  .dashboard-groups { width:100%; max-width:480px; max-height:45vh; overflow-y:auto; background:rgba(255,255,255,0.03); border-radius:16px; padding:15px; display:flex; flex-direction:column; gap:8px; margin-bottom:25px; }
-  .dashboard-groups::-webkit-scrollbar { width:6px; }
-  .dashboard-groups::-webkit-scrollbar-track { background:rgba(255,255,255,0.05); border-radius:3px; }
-  .dashboard-groups::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.2); border-radius:3px; }
+  .dashboard-form { width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px; }
+  .form-group { text-align:left; }
+  .form-label { display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:600; }
+  .form-input { width:100%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 15px; color:#fff; font-size:14px; font-family:inherit; outline:none; transition: border-color 0.2s, background 0.2s; }
+  .form-input:focus { border-color:var(--accent); background:rgba(255,255,255,0.12); }
+  .form-input::placeholder { color:rgba(255,255,255,0.4); }
+  textarea.form-input { resize:vertical; min-height:100px; }
   
-  .group-item { background:rgba(255,255,255,0.06); padding:12px 15px; border-radius:10px; font-size:13px; font-weight:600; text-align:left; word-break:break-word; }
-  
-  .dashboard-btn { background:linear-gradient(135deg, #ff1f1f, #ff5050); color:#fff; font-weight:800; font-size:16px; padding:14px 32px; border:none; border-radius:50px; cursor:pointer; text-decoration:none; display:inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(255,31,31,0.4); }
-  .dashboard-btn:hover { transform:scale(1.05); box-shadow:0 6px 30px rgba(255,31,31,0.6); }
+  .dashboard-btn { background:linear-gradient(135deg, #ff1f1f, #ff5050); color:#fff; font-weight:800; font-size:15px; padding:14px 28px; border:none; border-radius:50px; cursor:pointer; text-decoration:none; display:inline-block; transition: transform 0.2s, box-shadow 0.2s; box-shadow:0 4px 20px rgba(255,31,31,0.4); margin-top:8px; }
+  .dashboard-btn:hover { transform:scale(1.03); box-shadow:0 6px 30px rgba(255,31,31,0.6); }
   .dashboard-btn:active { transform:scale(0.98); }
+  .dashboard-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+  
+  .dashboard-btn-secondary { background:rgba(255,255,255,0.1); color:#fff; font-weight:700; }
+  .dashboard-btn-secondary:hover { background:rgba(255,255,255,0.15); box-shadow:none; }
 
-  .back-btn { position:absolute; top:20px; left:20px; background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:20px; width:40px; height:40px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .user-info { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:10px; margin-bottom:10px; }
+  .user-avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg, var(--accent), var(--accent2)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; }
+  .user-details { flex:1; text-align:left; }
+  .user-name { font-weight:700; font-size:14px; }
+  .user-id { font-size:11px; color:var(--muted); }
+
+  .success-message { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3); color:#22c55e; padding:12px 16px; border-radius:10px; font-size:13px; margin-top:10px; }
+  .error-message { background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); color:#ef4444; padding:12px 16px; border-radius:10px; font-size:13px; margin-top:10px; }
 
   @media(min-width:520px){ img.logo{ width:320px } }
 </style>
@@ -190,16 +180,34 @@ async function handleRequest(request) {
     <div id="landOverlay" class="landscape-overlay" aria-hidden="true">no fucking landscape!</div>
   </main>
 
-  <!-- Globan Dashboard -->
+  <!-- Send Appeal Dashboard -->
   <div id="dashboardOverlay" class="dashboard-overlay">
     <button id="closeDashboard" class="dashboard-close">&times;</button>
-    <img class="dashboard-logo" src="${escapeHtml(LOGO_URL)}" alt="Globan">
-    <div class="dashboard-title">GLOBAN</div>
-    <div class="dashboard-subtitle">Registered Groups</div>
-    <div class="dashboard-groups">
-      ${groupsHtml}
+    <img class="dashboard-logo" src="${escapeHtml(LOGO_URL)}" alt="Logo">
+    <div class="dashboard-title">Send Appeal</div>
+    <div class="dashboard-subtitle">Submit your appeal to the bot administrators</div>
+    
+    <div class="user-info" id="userInfo">
+      <div class="user-avatar" id="userAvatar">?</div>
+      <div class="user-details">
+        <div class="user-name" id="userName">Loading...</div>
+        <div class="user-id" id="userId">ID: ...</div>
+      </div>
     </div>
-    <a id="continueToBot" class="dashboard-btn" href="${escapeHtml(GLOBAN_BOT_URL)}" target="_blank" rel="noopener noreferrer">Continue to Bot</a>
+    
+    <form class="dashboard-form" id="appealForm">
+      <div class="form-group">
+        <label class="form-label">Your Appeal Message</label>
+        <textarea class="form-input" id="appealMessage" placeholder="Explain your situation and why you should be unbanned..." required></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Info (Optional)</label>
+        <input type="text" class="form-input" id="contactInfo" placeholder="Email, Telegram, or other contact method">
+      </div>
+      <button type="submit" class="dashboard-btn" id="submitAppeal">Submit Appeal</button>
+    </form>
+    
+    <div id="formMessage"></div>
   </div>
 
   <div class="info-row" aria-hidden="false">
@@ -214,40 +222,26 @@ async function handleRequest(request) {
     <source src="${escapeHtml(AUDIO_URL)}" type="audio/mpeg">
   </audio>
 
-  <!-- Dashboard audio -->
-  <audio id="dashboardAudio" preload="auto">
-    <source src="${escapeHtml(GLOBAN_DASHBOARD_AUDIO)}" type="audio/mp4">
-  </audio>
-
 <script>
   // Prevent back button and history manipulation
   (function() {
-    // Replace current history state to prevent back button
     history.replaceState(null, document.title, location.href);
-    
-    // Push a new state to make back button go to same page
     history.pushState(null, document.title, location.href);
     
-    // Handle popstate (back button press)
     window.addEventListener('popstate', function(event) {
-      // Push state again to prevent leaving
       history.pushState(null, document.title, location.href);
-      // Optionally show a message or ignore
     });
     
-    // Prevent long press context menu on mobile
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       return false;
     });
     
-    // Disable text selection on mobile to prevent long-press reveal
     document.addEventListener('selectstart', function(e) {
       e.preventDefault();
       return false;
     });
     
-    // Prevent double-tap zoom
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function(e) {
       const now = Date.now();
@@ -256,13 +250,6 @@ async function handleRequest(request) {
       }
       lastTouchEnd = now;
     }, false);
-    
-    // Prevent long press on links
-    document.addEventListener('touchstart', function(e) {
-      if (e.target.tagName === 'A' || e.target.tagName === 'SPAN') {
-        // Allow default but prevent context menu
-      }
-    });
   })();
 
   // helper: update Manila time
@@ -347,37 +334,28 @@ async function handleRequest(request) {
   const fadeOverlay = document.getElementById('fadeOverlay');
 
   function startAnonySequence() {
-    // disable repeated clicks
     anony.style.pointerEvents = 'none';
-    // pause background loop
     try { audio.pause(); } catch(e) {}
 
-    // create redirect audio element and play (user gesture ensures play allowed)
     const redirectAudio = new Audio(${JSON.stringify(ANONYCHAT_AUDIO_URL)});
     redirectAudio.preload = 'auto';
-    // when the audio actually begins playing, immediately show fade overlay
     redirectAudio.addEventListener('playing', () => {
       fadeOverlay.classList.add('visible');
       fadeOverlay.setAttribute('aria-hidden','false');
     }, { once: true });
 
-    // when audio ends, redirect (overwrite current page)
     redirectAudio.addEventListener('ended', () => {
-      try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch (e) { /* ignore */ }
+      try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch (e) { }
     }, { once: true });
 
-    // safety: if metadata loads, set optional timeout to redirect after duration + small buffer
     redirectAudio.addEventListener('loadedmetadata', () => {
       const dur = redirectAudio.duration && isFinite(redirectAudio.duration) ? (redirectAudio.duration * 1000) + 1200 : 8000;
-      // fallback redirect in case 'ended' doesn't fire
-      setTimeout(()=> {
+      setTimeout(() => {
         try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){}
       }, dur);
     }, { once: true });
 
-    // attempt play (should succeed because of user click)
     redirectAudio.play().catch((err) => {
-      // fallback: if play fails, still fade and redirect after 900ms
       fadeOverlay.classList.add('visible');
       fadeOverlay.setAttribute('aria-hidden','false');
       setTimeout(()=> { try { window.location.href = ${JSON.stringify(ANONYCHAT_INVITE)}; } catch(e){} }, 950);
@@ -427,51 +405,76 @@ async function handleRequest(request) {
       modal.classList.remove('show'); 
       modal.classList.add('hide'); 
       modal.setAttribute('aria-hidden','true');
-      // Also close dashboard if open
       closeDashboard();
     }
   });
 
-  // Globan Dashboard functionality
+  // ========== Send Appeal Dashboard Functionality ==========
   const globanBot = document.getElementById('globanBot');
   const dashboardOverlay = document.getElementById('dashboardOverlay');
   const closeDashboardBtn = document.getElementById('closeDashboard');
-  const dashboardAudio = document.getElementById('dashboardAudio');
+  const appealForm = document.getElementById('appealForm');
+  const formMessage = document.getElementById('formMessage');
+  const submitBtn = document.getElementById('submitAppeal');
+  
+  // Get user info from Telegram WebApp or prompt
+  let userData = {
+    user_id: '',
+    username: '',
+    first_name: ''
+  };
+
+  function getUserInfo() {
+    // Try to get info from Telegram WebApp
+    if (typeof telegram !== 'undefined' && telegram.WebApp) {
+      const user = telegram.WebApp.initDataUnsafe?.user;
+      if (user) {
+        userData = {
+          user_id: String(user.id || ''),
+          username: user.username || '',
+          first_name: user.first_name || 'User'
+        };
+      }
+    }
+    
+    // Update UI
+    const userNameEl = document.getElementById('userName');
+    const userIdEl = document.getElementById('userId');
+    const userAvatarEl = document.getElementById('userAvatar');
+    
+    if (userData.first_name) {
+      userNameEl.textContent = userData.first_name + (userData.username ? ' (@' + userData.username + ')' : '');
+      userIdEl.textContent = 'ID: ' + userData.user_id;
+      userAvatarEl.textContent = userData.first_name.charAt(0).toUpperCase();
+    } else {
+      // Prompt for user info if not available from Telegram
+      userNameEl.textContent = 'Enter your info';
+      userIdEl.textContent = 'ID: Not detected';
+      userAvatarEl.textContent = '?';
+    }
+  }
 
   function openDashboard() {
-    // Pause background audio
     try { audio.pause(); } catch(e) {}
-    
-    // Play dashboard audio
-    dashboardAudio.currentTime = 0;
-    dashboardAudio.play().catch(() => {});
-    
-    // Show dashboard
     dashboardOverlay.classList.add('active');
-    
-    // Prevent body scroll
     document.body.style.overflow = 'hidden';
-    
-    // Update history to prevent back
     history.pushState({dashboard: true}, document.title, location.href);
+    
+    // Get user info
+    getUserInfo();
   }
 
   function closeDashboard() {
-    // Stop dashboard audio
-    try { dashboardAudio.pause(); } catch(e) {}
-    dashboardAudio.currentTime = 0;
-    
-    // Hide dashboard
+    try { audio.play(); } catch(e) {}
     dashboardOverlay.classList.remove('active');
-    
-    // Restore body scroll
     document.body.style.overflow = '';
-    
-    // Resume background audio
-    audio.play().catch(() => {});
-    
-    // Replace history state
     history.replaceState({dashboard: false}, document.title, location.href);
+    
+    // Reset form
+    appealForm.reset();
+    formMessage.innerHTML = '';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Submit Appeal';
   }
 
   globanBot.addEventListener('click', (e) => {
@@ -491,22 +494,76 @@ async function handleRequest(request) {
     closeDashboard();
   }, { passive:false });
 
-  // Handle back button when dashboard is open
   window.addEventListener('popstate', function(event) {
     if (dashboardOverlay.classList.contains('active')) {
       closeDashboard();
-      // Push state again to stay on page
       history.pushState({dashboard: false}, document.title, location.href);
     }
   });
 
-  // Continue to bot button
-  const continueToBot = document.getElementById('continueToBot');
-  continueToBot.addEventListener('click', () => {
-    // Close dashboard when clicking continue
-    setTimeout(() => {
-      closeDashboard();
-    }, 100);
+  // Handle form submission
+  appealForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const appealMessage = document.getElementById('appealMessage').value.trim();
+    const contactInfo = document.getElementById('contactInfo').value.trim();
+    
+    if (!appealMessage) {
+      formMessage.innerHTML = '<div class="error-message">Please enter your appeal message</div>';
+      return;
+    }
+    
+    // If user info not available from Telegram, try to get from form inputs
+    let finalUserData = { ...userData };
+    
+    if (!finalUserData.user_id) {
+      finalUserData.user_id = prompt('Please enter your Telegram User ID:') || 'unknown';
+      finalUserData.username = prompt('Please enter your Telegram username (without @):') || '';
+      finalUserData.first_name = prompt('Please enter your name:') || 'User';
+      
+      // Update UI
+      document.getElementById('userName').textContent = finalUserData.first_name + (finalUserData.username ? ' (@' + finalUserData.username + ')' : '');
+      document.getElementById('userId').textContent = 'ID: ' + finalUserData.user_id;
+      document.getElementById('userAvatar').textContent = finalUserData.first_name.charAt(0).toUpperCase();
+    }
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+    formMessage.innerHTML = '';
+    
+    const appealData = {
+      user_id: finalUserData.user_id,
+      username: finalUserData.username,
+      first_name: finalUserData.first_name,
+      appeal_message: appealMessage,
+      contact_info: contactInfo,
+      timestamp: new Date().toISOString()
+    };
+    
+    try {
+      const response = await fetch(${JSON.stringify(APPEAL_WEBHOOK_URL)}, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${APPEAL_WEBHOOK_SECRET}'
+        },
+        body: JSON.stringify(appealData)
+      });
+      
+      if (response.ok) {
+        formMessage.innerHTML = '<div class="success-message">Appeal submitted successfully! The administrators will review your case.</div>';
+        submitBtn.textContent = 'Submitted!';
+        setTimeout(() => {
+          closeDashboard();
+        }, 2000);
+      } else {
+        throw new Error('Server error');
+      }
+    } catch (error) {
+      formMessage.innerHTML = '<div class="error-message">Failed to submit appeal. Please try again or contact support directly.</div>';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Appeal';
+    }
   });
 <\/script>
 </body>
@@ -519,6 +576,63 @@ async function handleRequest(request) {
       "cache-control": "no-store, private, max-age=0"
     }
   })
+}
+
+// Handle appeal webhook
+async function handleAppealWebhook(request) {
+  try {
+    // Verify authorization
+    const authHeader = request.headers.get('Authorization')
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
+    const token = authHeader.replace('Bearer ', '')
+    if (token !== APPEAL_WEBHOOK_SECRET) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Parse the appeal data
+    const appealData = await request.json()
+    
+    // Validate required fields
+    if (!appealData.user_id || !appealData.appeal_message) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Process the appeal (you can customize this)
+    // For now, just log it - you can add database storage or forward to Telegram
+    console.log('New Appeal Received:', JSON.stringify(appealData, null, 2))
+    
+    // Here you can add:
+    // - Save to KV/Database
+    // - Send to Telegram admin bot
+    // - Send confirmation to user
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Appeal received',
+      appeal_id: Date.now()
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    })
+    
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  }
 }
 
 /* small helper */
