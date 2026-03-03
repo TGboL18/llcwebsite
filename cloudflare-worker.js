@@ -5,7 +5,7 @@ addEventListener("fetch", event => {
 /* CONFIG */
 const SITE_TITLE = "LLC Creative Technologies"
 const LOGO_URL = "https://image2url.com/r2/default/gifs/1771931447321-b9c0bd19-ff5c-4d39-8d0a-06b9ab79821e.gif"
-const AUDIO_URL = "https://image2url.com/r2/default/audio/1771931706652-c6c30957-9354-46ef-869b-339a6e020cf6.mp3"
+const AUDIO_URL = "https://image2url.com/r2/default/audio/1772512586887-41c23277-3388-4b55-8625-2d76c6a61978.mp3"
 // invite for The Hub (hidden)
 const THE_HUB_INVITE = "https://t.me/+7AcFN8RMcnc5N2U1"
 // anonychat invite (hidden)
@@ -68,11 +68,6 @@ async function handleRequest(request) {
     return handleAppealWebhook(request)
   }
   
-  // Handle Telegram Login Widget authentication callback
-  if (request.url.includes("/webhook/auth")) {
-    return handleTelegramAuth(request)
-  }
-  
   if (request.method !== "GET") return new Response(null, { status: 405 })
 
   const views = await getAndIncrementViews()
@@ -89,12 +84,6 @@ async function handleRequest(request) {
 <title>${escapeHtml(SITE_TITLE)}</title>
 <meta name="theme-color" content="#000000" />
 <meta name="referrer" content="no-referrer" />
-<script async src="https://telegram.org/js/telegram-widget.js?22"
-        data-telegram-login="@globanllcbot_bot"
-        data-size="large"
-        data-auth-url="https://llcwebsite.theonej942.workers.dev/webhook/auth"
-        data-request-access="write">
-</script>
 <style>
   :root{ --bg:#000; --fg:#fff; --muted:rgba(255,255,255,0.8); --gray:#9aa0a6; --accent:#ff1f1f; --accent2:#a855f7; }
   * { box-sizing: border-box; }
@@ -187,6 +176,163 @@ async function handleRequest(request) {
 
   .button-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
 
+  /* DANCE MODE STYLES */
+  .dance-btn { 
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 300% 300%;
+    animation: rainbow-bg 2s ease infinite;
+    color: #fff !important;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 15px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    box-shadow: 0 0 20px rgba(255,0,255,0.6);
+    animation: rainbow-bg 1s linear infinite, pulse 0.5s ease-in-out infinite alternate;
+  }
+  
+  .dance-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(255,0,255,0.9);
+  }
+  
+  @keyframes rainbow-bg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes pulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.05); }
+  }
+  
+  /* Dance mode - rainbow text */
+  .dance-mode .title,
+  .dance-mode .meta,
+  .dance-mode .section h3,
+  .dance-mode .link,
+  .dance-mode .thehub,
+  .dance-mode .anony,
+  .dance-mode .other-site {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+    background-size: 400% 400%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbow-text 0.5s linear infinite;
+    text-shadow: none !important;
+  }
+  
+  @keyframes rainbow-text {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Dance mode - spinning */
+  .dance-mode .logo {
+    animation: spin 0.5s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg) scale(1); }
+    to { transform: rotate(360deg) scale(1.1); }
+  }
+  
+  /* Dance mode - rainbow background */
+  .dance-mode {
+    animation: rainbow-bg-full 0.5s linear infinite;
+  }
+  
+  @keyframes rainbow-bg-full {
+    0% { background: linear-gradient(90deg, #ff0000, #ff7f00); }
+    25% { background: linear-gradient(90deg, #ff7f00, #ffff00); }
+    50% { background: linear-gradient(90deg, #ffff00, #00ff00); }
+    75% { background: linear-gradient(90deg, #00ff00, #0000ff); }
+    100% { background: linear-gradient(90deg, #0000ff, #ff0000); }
+  }
+  
+  .dance-mode body,
+  .dance-mode html {
+    background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 400% 400%;
+    animation: rainbow-bg-full 0.5s linear infinite;
+  }
+  
+  /* Beat effect */
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  .dance-beat {
+    animation: beat 0.3s ease-in-out infinite;
+  }
+  
+  /* Big DANCE text overlay */
+  .dance-text-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9000;
+    pointer-events: none;
+  }
+  
+  .dance-text-overlay.active {
+    display: flex;
+  }
+  
+  .dance-text {
+    font-size: 15vw;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 
+      0 0 10px #ff0000,
+      0 0 20px #ff7f00,
+      0 0 30px #ffff00,
+      0 0 40px #00ff00,
+      0 0 50px #0000ff,
+      0 0 60px #4b0082,
+      0 0 70px #9400d3;
+    animation: flash-glow 0.3s ease-in-out infinite alternate;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  
+  .dance-text.show {
+    opacity: 1;
+  }
+  
+  @keyframes flash-glow {
+    from { 
+      text-shadow: 
+        0 0 10px #ff0000,
+        0 0 20px #ff7f00,
+        0 0 30px #ffff00,
+        0 0 40px #00ff00,
+        0 0 50px #0000ff;
+      transform: scale(1);
+    }
+    to { 
+      text-shadow: 
+        0 0 20px #ff0000,
+        0 0 40px #ff7f00,
+        0 0 60px #ffff00,
+        0 0 80px #00ff00,
+        0 0 100px #0000ff,
+        0 0 120px #4b0082;
+      transform: scale(1.1);
+    }
+  }
+
   @media(min-width:520px){ img.logo{ width:320px } }
 </style>
 </head>
@@ -219,6 +365,11 @@ async function handleRequest(request) {
           <span id="anonychat" class="anony" tabindex="0">anonychat</span>
         </div>
       </div>
+      
+      <!-- Dance Button -->
+      <div class="section">
+        <button id="danceBtn" class="dance-btn">DANCE</button>
+      </div>
     </div>
 
     <div id="rainer" class="rainer" aria-hidden="true"></div>
@@ -226,6 +377,11 @@ async function handleRequest(request) {
     <div id="modal" class="modal hide" role="dialog" aria-modal="true" aria-hidden="true">Currently not available</div>
     <div id="fadeOverlay" class="fade-overlay" aria-hidden="true"></div>
     <div id="landOverlay" class="landscape-overlay" aria-hidden="true">no fucking landscape!</div>
+    
+    <!-- Dance Text Overlay -->
+    <div id="danceOverlay" class="dance-text-overlay">
+      <div id="danceText" class="dance-text">DANCE</div>
+    </div>
   </main>
 
   <!-- Globan Dashboard -->
@@ -239,26 +395,12 @@ async function handleRequest(request) {
       ${groupsHtml}
     </div>
     
-    <div class="user-info" id="userInfo" style="display:none;">
-      <div class="user-avatar" id="userAvatar">?</div>
-      <div class="user-details">
-        <div class="user-name" id="userName">Loading...</div>
-        <div class="user-id" id="userId">ID: ...</div>
-      </div>
-    </div>
-    
-    <!-- Telegram Login Widget Container -->
-    <div id="telegramLoginContainer" class="dashboard-form" style="display:none; text-align:center;">
-      <p style="color:rgba(255,255,255,0.7); margin-bottom:15px; font-size:13px;">Please login with Telegram to submit an appeal</p>
-      <script async src="https://telegram.org/js/telegram-widget.js?22"
-        data-telegram-login="@globanllcbot_bot"
-        data-size="large"
-        data-auth-url="https://llcwebsite.theonej942.workers.dev/webhook/auth"
-        data-request-access="write">
-      </script>
-    </div>
-    
+    <!-- Simplified Appeal Form -->
     <form class="dashboard-form" id="appealForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Your Telegram Username</label>
+        <input type="text" class="form-input" id="appealUsername" placeholder="@username" required>
+      </div>
       <div class="form-group">
         <label class="form-label">Your Appeal Message</label>
         <textarea class="form-input" id="appealMessage" placeholder="Explain your situation and why you should be unbanned..." required></textarea>
@@ -287,25 +429,6 @@ async function handleRequest(request) {
   </audio>
 
 <script>
-  // Check for Telegram auth data in URL on page load
-  (function() {
-    const params = new URLSearchParams(window.location.search)
-    const telegramAuth = params.get('telegram_auth')
-    
-    if (telegramAuth) {
-      try {
-        const userData = JSON.parse(atob(telegramAuth))
-        // Store user data in localStorage for persistence
-        localStorage.setItem('telegram_user', JSON.stringify(userData))
-        
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname)
-      } catch (e) {
-        console.error('Failed to parse Telegram auth data:', e)
-      }
-    }
-  })();
-  
   // Prevent back button and history manipulation
   (function() {
     history.replaceState(null, document.title, location.href);
@@ -492,6 +615,122 @@ async function handleRequest(request) {
     }
   });
 
+  // ========== DANCE MODE ==========
+  const danceBtn = document.getElementById('danceBtn');
+  const danceOverlay = document.getElementById('danceOverlay');
+  const danceText = document.getElementById('danceText');
+  const body = document.body;
+  const html = document.documentElement;
+  const mainWrap = document.querySelector('.wrap');
+  
+  let isDancing = false;
+  let danceInterval = null;
+  let danceAudio = null;
+  let beatInterval = null;
+  let flashInterval = null;
+  
+  function startDanceMode() {
+    if (isDancing) return;
+    isDancing = true;
+    
+    // Change button text
+    danceBtn.textContent = '🌈 RAINBOW DANCING 🌈';
+    danceBtn.style.animation = 'rainbow-bg 0.3s linear infinite, pulse 0.2s ease-in-out infinite alternate';
+    
+    // Add dance class to body for rainbow background
+    body.classList.add('dance-mode');
+    html.classList.add('dance-mode');
+    mainWrap.classList.add('dance-mode');
+    
+    // Play the audio loop
+    try {
+      danceAudio = new Audio(${JSON.stringify(AUDIO_URL)});
+      danceAudio.loop = true;
+      danceAudio.play().catch(() => {});
+      
+      // Add beat effect to the music
+      danceAudio.addEventListener('timeupdate', () => {
+        // Beat effect every beat (roughly based on BPM)
+        const beatPosition = danceAudio.currentTime % 0.5;
+        if (beatPosition < 0.1) {
+          mainWrap.classList.add('dance-beat');
+        } else {
+          mainWrap.classList.remove('dance-beat');
+        }
+      });
+    } catch(e) {}
+    
+    // Start firing TH every 1 second
+    danceInterval = setInterval(() => {
+      createTH();
+    }, 1000);
+    
+    // Show and flash DANCE text
+    danceOverlay.classList.add('active');
+    flashInterval = setInterval(() => {
+      danceText.classList.toggle('show');
+    }, 150);
+  }
+  
+  function stopDanceMode() {
+    if (!isDancing) return;
+    isDancing = false;
+    
+    // Reset button
+    danceBtn.textContent = 'DANCE';
+    danceBtn.style.animation = '';
+    
+    // Remove dance classes
+    body.classList.remove('dance-mode');
+    html.classList.remove('dance-mode');
+    mainWrap.classList.remove('dance-mode');
+    mainWrap.classList.remove('dance-beat');
+    
+    // Stop audio
+    if (danceAudio) {
+      danceAudio.pause();
+      danceAudio = null;
+    }
+    
+    // Stop TH interval
+    if (danceInterval) {
+      clearInterval(danceInterval);
+      danceInterval = null;
+    }
+    
+    // Hide dance text
+    danceOverlay.classList.remove('active');
+    if (flashInterval) {
+      clearInterval(flashInterval);
+      flashInterval = null;
+    }
+    
+    // Resume normal background audio
+    try { audio.play().catch(() => {}); } catch(e) {}
+  }
+  
+  // button click
+  danceBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (isDancing) {
+      stopDanceMode();
+    } else {
+      startDanceMode();
+    }
+  });
+  
+  // Also allow keyboard access
+  danceBtn.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter' || ev.key === ' ') {
+      ev.preventDefault();
+      if (isDancing) {
+        stopDanceMode();
+      } else {
+        startDanceMode();
+      }
+    }
+  });
+
   // ========== Globan Dashboard Functionality ==========
   const globanBot = document.getElementById('globanBot');
   const dashboardOverlay = document.getElementById('dashboardOverlay');
@@ -501,46 +740,6 @@ async function handleRequest(request) {
   const submitBtn = document.getElementById('submitAppeal');
   const showAppealBtn = document.getElementById('showAppealBtn');
   const continueToBot = document.getElementById('continueToBot');
-  const userInfoEl = document.getElementById('userInfo');
-  
-  // Auto-detect user info from Telegram Login Widget (via localStorage)
-  let userData = {
-    user_id: '',
-    username: '',
-    first_name: ''
-  };
-
-  function detectUserInfo() {
-    // Try to get info from localStorage (set after Telegram login)
-    const stored = localStorage.getItem('telegram_user')
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored)
-        userData = {
-          user_id: String(parsed.user_id || ''),
-          username: parsed.username || '',
-          first_name: parsed.first_name || 'User'
-        }
-      } catch (e) {
-        console.error('Failed to parse stored user data:', e)
-      }
-    }
-    
-    // Update UI if user data is available
-    if (userData.user_id) {
-      const userNameEl = document.getElementById('userName')
-      const userIdEl = document.getElementById('userId')
-      const userAvatarEl = document.getElementById('userAvatar')
-      
-      userNameEl.textContent = userData.first_name + (userData.username ? ' (@' + userData.username + ')' : '')
-      userIdEl.textContent = 'ID: ' + userData.user_id
-      userAvatarEl.textContent = userData.first_name.charAt(0).toUpperCase()
-      
-      userInfoEl.style.display = 'flex'
-      return true
-    }
-    return false
-  }
 
   function openDashboard() {
     try { audio.pause(); } catch(e) {}
@@ -550,13 +749,9 @@ async function handleRequest(request) {
     
     // Reset to initial state
     appealForm.style.display = 'none';
-    telegramLoginContainer.style.display = 'none';
     formMessage.innerHTML = '';
     showAppealBtn.textContent = 'Submit Appeal';
     showAppealBtn.style.display = 'inline-block';
-    
-    // Auto-detect user info
-    detectUserInfo();
   }
 
   function closeDashboard() {
@@ -568,7 +763,6 @@ async function handleRequest(request) {
     // Reset form
     appealForm.reset();
     appealForm.style.display = 'none';
-    telegramLoginContainer.style.display = 'none';
     formMessage.innerHTML = '';
     showAppealBtn.style.display = 'inline-block';
   }
@@ -597,23 +791,11 @@ async function handleRequest(request) {
     }
   });
 
-  // Show appeal form
-  const telegramLoginContainer = document.getElementById('telegramLoginContainer')
-  
+  // Show appeal form - simplified (no login required)
   showAppealBtn.addEventListener('click', (e) => {
     e.preventDefault();
     showAppealBtn.style.display = 'none';
-    
-    // Check if user is already logged in
-    const isLoggedIn = detectUserInfo()
-    
-    if (isLoggedIn) {
-      // User is logged in, show the appeal form
-      appealForm.style.display = 'flex'
-    } else {
-      // User is not logged in, show Telegram login widget
-      telegramLoginContainer.style.display = 'block'
-    }
+    appealForm.style.display = 'flex';
   });
 
   // Continue to bot button
@@ -627,16 +809,16 @@ async function handleRequest(request) {
   appealForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const appealMessage = document.getElementById('appealMessage').value.trim();
+    const appealUsername = document.getElementById('appealUsername').value.trim()
+    const appealMessage = document.getElementById('appealMessage').value.trim()
     
-    if (!appealMessage) {
-      formMessage.innerHTML = '<div class="error-message">Please enter your appeal message</div>';
+    if (!appealUsername) {
+      formMessage.innerHTML = '<div class="error-message">Please enter your Telegram username</div>';
       return;
     }
     
-    // Check if user info is available
-    if (!userData.user_id) {
-      formMessage.innerHTML = '<div class="error-message">Please login with Telegram to submit an appeal.</div>';
+    if (!appealMessage) {
+      formMessage.innerHTML = '<div class="error-message">Please enter your appeal message</div>';
       return;
     }
     
@@ -645,9 +827,7 @@ async function handleRequest(request) {
     formMessage.innerHTML = '';
     
     const appealData = {
-      user_id: userData.user_id,
-      username: userData.username,
-      first_name: userData.first_name,
+      username: appealUsername,
       appeal_message: appealMessage,
       timestamp: new Date().toISOString()
     };
